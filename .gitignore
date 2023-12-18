@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+
+# Build files
+dist/
+build/
+*.log
+
+# macOS
+.DS_Store
+
+# JetBrains IDEs
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Package files
+package-lock.json
+yarn.lock
+
+# env variables
+.env
