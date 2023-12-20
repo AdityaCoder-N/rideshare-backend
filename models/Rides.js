@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-
+// coordiantes - latitude and longitude
+// cost - decide
+// seats available.
 const RideSchema = new mongoose.Schema({
   source:{
     required:true,
@@ -11,7 +13,7 @@ const RideSchema = new mongoose.Schema({
   },
   cost:{
     type:Number,
-    required:true
+    required:false
   },
   start:{
     type:Date,

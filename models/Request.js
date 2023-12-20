@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
-
+// dl photo
 const RequestSchema = new mongoose.Schema({
   user:{
     type: mongoose.Schema.Types.ObjectId,
     ref:'user',
     required:true
   },
+  // user image url
   imageUrl:{
     type:String,
     required:true
@@ -22,7 +23,7 @@ const RequestSchema = new mongoose.Schema({
     type:String,
     required:true
   },
-  aceepted:{
+  accepted:{
     type:Boolean,
     default:false
   }
