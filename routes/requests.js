@@ -22,10 +22,7 @@ router.post('/make-request',fetchUser , cpUpload,  async (req, res) => {
     console.log("Profile Photo: ", profilePhoto);
 
     const { id, state, dob, lisenceNumber } = req.body;
-    // const userId = req.user.id;
     
-    // Check if the user has already made a request
-    // const existingRequest = await Request.findOne({ user: userId });
     const existingRequest = await Request.findOne({ user: id });
 
     if (existingRequest) {
