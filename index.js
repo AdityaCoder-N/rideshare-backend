@@ -3,7 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectToMongo = require('./db')
 const authRoutes = require('./routes/auth')
-
+const adminRoutes=require('./routes/admin')
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === "production") {
 
 
 app.use('/auth',authRoutes);
-
+app.use('/admin',adminRoutes)
 
 
 app.listen(port, () => {

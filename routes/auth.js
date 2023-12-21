@@ -10,7 +10,7 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
-router.post('/createuser', [
+router.post('/register', [
   body('email', 'Enter a valid Email').isEmail(),
   body('password', 'Enter a valid Password').isLength({ min: 3 })
 ], async (req, res) => {
@@ -34,18 +34,14 @@ router.post('/createuser', [
         password: secPassword,
         email: req.body.email
     });
-    console.log("chal");
-    
     const data = {
       user: {
         id: user.id
       }
     };
-
-
     const authToken = jwt.sign(data, JWT_SECRET);
     success = true;
-    res.status(200).json({ success, authToken });
+    res.status(200).json({ success, authToken, user });
   } catch (err) {
     return res.status(500).json({ success: false, error: err });
   }
@@ -84,7 +80,7 @@ router.post('/login',
         }
         const authToken =  jwt.sign(data, JWT_SECRET);
         success=true;
-        res.status(200).json({success,authToken});
+        res.status(200).json({success,authToken,user});
 
     } catch(error){
         console.error(error.message);

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const fetchUser = require('../middlewares/fetchUser');
 const Admin = require('../models/Admin');
-
+const User = require('../models/User')
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Route to create an admin
