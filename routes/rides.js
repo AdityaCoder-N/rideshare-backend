@@ -21,9 +21,11 @@ router.post('/create-ride', async (req, res) => {
     const {source,sourceCoord , destination, destinationCoord , cost, startDate ,startTime,  seatsAvailable , postedBy} = req.body;
  
     const user = await User.findById(postedBy);
-
+    
     if(!user)
-      return res.status(402).json({message : "user not found"});
+      return res.status(402).json({success: false, message : "user not found"});
+    if(!user.verified )
+    return res.status(402).json({success: false, message : "user not verified"});
     //console.log(user);
     let ride = await Ride.create({
       source,sourceCoord , destination, destinationCoord , cost, startDate ,startTime,  seatsAvailable , postedBy 
