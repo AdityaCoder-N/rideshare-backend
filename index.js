@@ -6,6 +6,7 @@ const connectToMongo = require('./db')
 const authRoutes = require('./routes/auth')
 const request = require("./routes/requests");
 const adminRoutes = require("./routes/admin");
+const rideroutes = require("./routes/rides");
 
 dotenv.config();
 const app = express();
@@ -30,6 +31,8 @@ if (process.env.NODE_ENV === "production") {
 app.use('/admin',adminRoutes);
 app.use('/auth',authRoutes);
 app.use("/request" , request);
+app.use("/ride" , rideroutes);
+
 
 
 

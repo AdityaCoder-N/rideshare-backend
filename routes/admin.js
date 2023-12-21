@@ -101,6 +101,8 @@ router.post('/verify-user/:userId', async (req, res) => {
     }
 });
 
+
+
 // Route to fetch unverified users
 router.get('/get-unverified-users', async (req, res) => {
     try {
@@ -145,7 +147,9 @@ router.get('/unverified-requests', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-  
+
+
+
 // Route to get details for a single request
 router.get('/request/:requestId', async (req, res) => {
   try {
@@ -171,6 +175,41 @@ router.get('/request/:requestId', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+
+// Route to handle user verification based on the request ID
+router.get('/verify-request/:requestId', async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+
+    // Find the request by ID
+    const request = await Request.findById(requestId);
+   console.log(request);
+    if (!request) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+    const user = await User.findById(request.user);
+    if(!user)
+    return res.status(404).json({ message: 'User not found' });
+   
+    // console.log(user);
+    
+    if (request.accepted && user.verified) {
+      return res.status(400).json({ success: false, message: 'User already verified' });
+    }
+     // Update the user's verified status to true
+     user.verified = true;
+     await user.save();
+     request.accepted = true;
+     await request.save();
+    res.status(200).json({ success: true, message: 'Request verified successfully' });
+   }
+   catch(error){
+    res.status(400).json({ success: false, message: 'Invalid request ID or user already verified' });
+   }
+  } 
+);
+
 
 router.delete('/delete-all-users', async (req, res) => {
     try {

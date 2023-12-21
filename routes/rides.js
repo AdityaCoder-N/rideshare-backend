@@ -11,22 +11,28 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
-router.post('/create-ride',async (req, res) => {
+
+// sharing ride 
+router.post('/create-ride', async (req, res) => {
   let success = false;
-
+ 
   try {
-    
-    const {source,destination,cost,postedBy} = req.body;
+   // console.log(req.body)
+    const {source,sourceCoord , destination, destinationCoord , cost, startDate ,startTime,  seatsAvailable , postedBy} = req.body;
+ 
+    const user = await User.findById(postedBy);
 
+    if(!user)
+      return res.status(402).json({message : "user not found"});
+    //console.log(user);
     let ride = await Ride.create({
-        source,destination,cost,postedBy
+      source,sourceCoord , destination, destinationCoord , cost, startDate ,startTime,  seatsAvailable , postedBy 
     })
-
-    const saveRide = ride.save();
-
-    res.status(200).json({saveRide});
-
+  console.log(ride);
+     ride.save();
   
+   
+     return res.status(200).json({ success: true, message  : "ride saved"});
   } catch (err) {
     return res.status(500).json({ success: false, error: err });
   }
