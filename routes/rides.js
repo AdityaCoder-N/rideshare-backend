@@ -24,15 +24,16 @@ router.post('/create-ride', async (req, res) => {
     const user = await User.findById(postedBy);
     
     if(!user)
-      return res.status(402).json({success: false, message : "user not found"});
+      return res.status(400).json({success: false, message : "user not found"});
     if(!user.verified )
-    return res.status(402).json({success: false, message : "user not verified"});
-    //console.log(user);
+    return res.status(400).json({success: false, message : "user not verified"});
+    console.log("body me ye aya : ",req.body);
+
     let ride = await Ride.create({
       source,sourceCoord , destination, destinationCoord , cost, startDate ,startTime,  seatsAvailable , postedBy 
     })
-  console.log(ride);
-     ride.save();
+      console.log(ride);
+        ride.save();
   
    
      return res.status(200).json({ success: true, message  : "ride saved"});
@@ -77,20 +78,27 @@ router.get('/ride-taken-status/:userid', async (req, res) => {
 
 
 router.get('/get-rides', async (req, res) => {
-    try {
+  try {
       // Get the current time
       const currentTime = new Date();
-  
-      // Find rides with start time greater than the current time and not accepted
-        const rides = await Ride.find({
-        start: { $gt: currentTime },
-        acceptedBy: { $exists: false } // Exclude rides that are already accepted
-      });
-  
-      res.status(200).json({ rides });
-    } catch (error) {
-      res.status(500).json({ error });
-    }
+
+      // Find rides with startDate greater than the current date or
+      // rides with startDate equal to the current date and startTime greater than the current time
+      const rides = await Ride.find({
+          $or: [
+              { startDate: { $gt: currentTime } },
+              {
+                  startDate: { $eq: currentTime },
+                  startTime: { $gt: currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+              }
+          ],
+          acceptedBy: null // Exclude rides that are already accepted
+      }).populate('postedBy', 'name'); // Populate the 'postedBy' field with user's name
+
+      res.status(200).json({ success: true, rides });
+  } catch (error) {
+      res.status(500).json({ success: false, error });
+  }
 });
 
 

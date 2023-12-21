@@ -48,7 +48,8 @@ const RideSchema = new mongoose.Schema({
   acceptedBy:{
     type: mongoose.Schema.Types.ObjectId,
     ref:'user',
-    required:false
+    required:false,
+    default:null
   }
 });
 
