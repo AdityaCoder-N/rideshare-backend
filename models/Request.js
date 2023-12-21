@@ -7,7 +7,11 @@ const RequestSchema = new mongoose.Schema({
     required:true
   },
   // user image url
-  imageUrl:{
+  profilePhotoUrl:{
+    type:String,
+    required:true
+  },
+  dlPhotoUrl:{
     type:String,
     required:true
   },

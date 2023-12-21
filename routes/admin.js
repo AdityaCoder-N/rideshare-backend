@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const fetchUser = require('../middlewares/fetchUser');
 const Admin = require('../models/Admin');
-const User = require('../models/User')
+const Request = require("../models/Request")
+const User = require("../models/User")
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Route to create an admin
@@ -112,8 +114,64 @@ router.get('/get-unverified-users', async (req, res) => {
     }
 });
 
+// Route to fetch all unverified requests
+router.get('/unverified-requests', async (req, res) => {
+  try {
+    // Find all requests where verified is false
+    const unverifiedRequests = await Request.find({ accepted: false });
+   // Extract user IDs from unverified requests
+   const userIds = unverifiedRequests.map(request => request.user);
 
+   // Find users with matching IDs
+   const users = await User.find({ _id: { $in: userIds } });
+
+   // Create a mapping of user IDs to user names
+   const userIdToNameMap = {};
+   const userIdToEmailMap = {};
+   users.forEach(user => {
+     userIdToNameMap[user._id.toString()] = user.name; // Assuming 'name' is a field in your UserModel
+     userIdToEmailMap[user._id.toString()] = user.email;
+   });
+    // Enhance each unverified request with the user name
+    const enhancedUnverifiedRequests = unverifiedRequests.map(request => ({
+      ...request.toObject(),
+      userName: userIdToNameMap[request.user],
+      userEmail: userIdToEmailMap[request.user],
+    }));
+
+    res.json(enhancedUnverifiedRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
   
+// Route to get details for a single request
+router.get('/request/:requestId', async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+
+    // Find the request by ID
+    const request = await Request.findById(requestId);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+
+    // Find the user associated with the request
+    const user = await User.findById(request.user);
+
+    // Return the request details along with user information
+    res.json({
+       request : request,
+       user : user
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 router.delete('/delete-all-users', async (req, res) => {
     try {
       // Delete all users
@@ -125,4 +183,7 @@ router.delete('/delete-all-users', async (req, res) => {
     }
 });
   
+
+
+
 module.exports = router;
