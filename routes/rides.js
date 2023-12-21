@@ -12,6 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
 
+
 // sharing ride 
 router.post('/create-ride', async (req, res) => {
   let success = false;
@@ -40,6 +41,41 @@ router.post('/create-ride', async (req, res) => {
   }
 });
 
+router.get('/ride-shared-status/:userid', async (req, res) => {
+  try {
+    const userId = req.params.userid;
+
+    // Assuming you have a field like 'postedBy' in your Ride model
+    const rides = await Ride.find({ postedBy: userId });
+    
+    console.log(rides);
+
+    res.status(200).json({ status: true, message: 'Ride status retrieved successfully', rides });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+});
+
+
+router.get('/ride-taken-status/:userid', async (req, res) => {
+  try {
+    const userId = req.params.userid;
+    
+    // Assuming you have a field like 'postedBy' in your Ride model
+    const rides = await Ride.find({ acceptedBy: userId });
+    
+    console.log(rides);
+    
+    res.status(200).json({ status: true, message: 'Ride status retrieved successfully', rides });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+});
+
+
+
 router.get('/get-rides', async (req, res) => {
     try {
       // Get the current time
@@ -57,14 +93,17 @@ router.get('/get-rides', async (req, res) => {
     }
 });
 
-router.post('/select-ride', fetchUser, async (req, res) => {
+
+
+
+router.post('/accept-ride', fetchUser, async (req, res) => {
     try {
-      const { rideId } = req.body;
+      const { rideId  } = req.body;
       const userId = req.user.id;
-  
+      
       // Find the ride
       const ride = await Ride.findById(rideId);
-  
+      
       if (!ride) {
         return res.status(404).json({ success: false, error: 'Ride not found' });
       }
@@ -87,9 +126,10 @@ router.post('/select-ride', fetchUser, async (req, res) => {
       }
   
       // Update ride details
+      ride.status = "ACTIVE";
       ride.acceptedBy = userId;
       ride.save();
-  
+      
       // Decrease balance of the user accepting the ride
       req.user.balance -= ride.cost;
       await req.user.save();

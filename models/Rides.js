@@ -40,6 +40,11 @@ const RideSchema = new mongoose.Schema({
     ref:'user',
     required:true
   },
+  status:{
+    type: String ,
+    required :false,
+    default :"PENDING"
+  },
   acceptedBy:{
     type: mongoose.Schema.Types.ObjectId,
     ref:'user',
