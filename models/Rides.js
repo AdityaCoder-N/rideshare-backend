@@ -3,6 +3,14 @@ const mongoose = require('mongoose');
 // cost - decide
 // seats available.
 const RideSchema = new mongoose.Schema({
+  sourceCoord:{
+    type:Array,
+    required:true
+  },
+  destinationCoord:{
+    type:Array,
+    required:true
+  },
   source:{
     required:true,
     type:String
@@ -15,8 +23,16 @@ const RideSchema = new mongoose.Schema({
     type:Number,
     required:false
   },
-  start:{
+  startDate:{
     type:Date,
+    required:true
+  },
+  startTime:{
+    type:String,
+    required:true
+  },
+  seatsAvailable:{
+    type:Number,
     required:true
   },
   postedBy:{
