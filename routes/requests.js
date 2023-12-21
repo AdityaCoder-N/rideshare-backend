@@ -1,33 +1,50 @@
 const express = require("express");
 const router = express.Router();
+const multer = require('multer')
 const Request = require('../models/Request');
 const User = require('../models/User');
 const fetchUser = require('../middlewares/fetchUser');
 
+
+const storage = multer.memoryStorage();
+const upload = multer({ dest : 'uploads/' });
 // Route to make a request
-router.post('/make-request', fetchUser, async (req, res) => {
+const cpUpload = upload.fields([{ name: 'dl_photo', maxCount: 1 }, { name: 'profile', maxCount: 1 }])
+router.post('/make-request',fetchUser , cpUpload,  async (req, res) => {
   try {
     
-    const { imageUrl, state, dob, lisenceNumber } = req.body;
-    const userId = req.user.id;
+    console.log(req.body);
+    // Access uploaded files using req.files
+    const dlPhoto = req.files['dl_photo'] ? req.files['dl_photo'][0] : null;
+    const profilePhoto = req.files['profile'] ? req.files['profile'][0] : null;
 
+    console.log("DL Photo: ", dlPhoto);
+    console.log("Profile Photo: ", profilePhoto);
+
+    const { id, state, dob, lisenceNumber } = req.body;
+    // const userId = req.user.id;
+    
     // Check if the user has already made a request
-    const existingRequest = await Request.findOne({ user: userId });
+    // const existingRequest = await Request.findOne({ user: userId });
+    const existingRequest = await Request.findOne({ user: id });
 
     if (existingRequest) {
       return res.status(400).json({ success: false, error: 'Request already made' });
     }
 
     // Create a new request
-    const newRequest = await Request.create({
-      user: userId,
-      imageUrl,
+    const newRequest = Request({
+      user: id,
+      profilePhotoUrl : profilePhoto.path,
+      dlPhotoUrl : dlPhoto.path,
       state,
       dob,
       lisenceNumber,
     });
-
-    res.status(200).json({ success: true, message: 'Request made successfully', request: newRequest });
+    console.log(newRequest)
+    await newRequest.save();
+     res.status(200).json({ success: true, message: 'Request made successfully', request: newRequest });
+    // return res.json("good");
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });

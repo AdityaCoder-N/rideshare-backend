@@ -20,7 +20,7 @@ router.post('/createuser', [
   if (!errors.isEmpty()) {
     return res.status(400).json({ success, errors: errors.array() });
   }
-
+  console.log(req.body);
   try {
     let user = await User.findOne({ email: req.body.email });
     if (user) {
@@ -29,13 +29,18 @@ router.post('/createuser', [
     const salt = await bcrypt.genSalt(10);
     const secPassword = await bcrypt.hash(req.body.password, salt);
     
-    user = await User.create({
+    // Create a new user with the hashed password
+
+
+    
+
+const newUser = new User({
         name: req.body.name,
         password: secPassword,
         email: req.body.email
     });
-    console.log("chal");
-    
+  
+    await newUser.save();
     const data = {
       user: {
         id: user.id
