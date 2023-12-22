@@ -6,6 +6,7 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fetchUser = require('../middlewares/fetchUser');
+const { route } = require("./auth");
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -47,7 +48,7 @@ router.get('/ride-shared-status/:userid', async (req, res) => {
     const userId = req.params.userid;
 
     // Assuming you have a field like 'postedBy' in your Ride model
-    const rides = await Ride.find({ postedBy: userId });
+    const rides = await Ride.find({ postedBy: userId }).populate("acceptedBy" , "name");;
     
     console.log(rides);
 
@@ -64,7 +65,7 @@ router.get('/ride-taken-status/:userid', async (req, res) => {
     const userId = req.params.userid;
     
     // Assuming you have a field like 'postedBy' in your Ride model
-    const rides = await Ride.find({ acceptedBy: userId });
+    const rides = await Ride.find({ acceptedBy: userId }).populate("postedBy" , "name");
     
     console.log(rides);
     
@@ -177,5 +178,25 @@ router.post('/accept-ride', fetchUser, async (req, res) => {
     }
 });
 
+
+router.get('/ride-complete/:id', async (req, res) => {
+  try {
+    const rideId = req.params.id;
+  
+    
+    // Find the ride
+    const ride = await Ride.findById(rideId);
+    
+    if (!ride) {
+      return res.status(404).json({ success: false, error: 'Ride not found' });
+    }
+    ride.status = "COMPLETED";
+    ride.save();
+    res.status(200).json({ success: true, message: 'Ride completed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
 
 module.exports = router;
