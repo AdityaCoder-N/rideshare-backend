@@ -14,6 +14,11 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isAdmin:{
+    type:Boolean,
+    required:true,
+    default:true
+  }
 });
 
 const AdminModel = mongoose.model('admin', AdminSchema);

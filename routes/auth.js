@@ -31,24 +31,17 @@ router.post('/register', [
     
     // Create a new user with the hashed password
 
-
-    
-
-    const newUser = new User({
+    user = new User({
         name: req.body.name,
         password: secPassword,
         email: req.body.email
     });
-  
-    await newUser.save();
-    const data = {
-      user: {
-        id: user.id
-      }
-    };
-    const authToken = jwt.sign(data, JWT_SECRET);
-    success = true;
-    res.status(200).json({ success, authToken, newUser });
+    
+    console.log("chalra")
+    user.save();
+    console.log("chalra 2")
+    
+    res.status(200).json({ success:true });
   } catch (err) {
     return res.status(500).json({ success: false, error: err });
   }

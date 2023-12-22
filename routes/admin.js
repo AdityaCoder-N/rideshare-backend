@@ -28,6 +28,10 @@ router.post('/create-admin', [
     if (admin) {
       return res.status(400).json({ success: false, error: 'Admin with this email already exists' });
     }
+    let user = await User.findOne({ email: req.body.email });
+    if (user) {
+      return res.status(400).json({ success: false, error: 'User with this email exists , Use different email for admin' });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const secPassword = await bcrypt.hash(req.body.password, salt);
@@ -46,11 +50,51 @@ router.post('/create-admin', [
 
     const authToken = jwt.sign(data, JWT_SECRET);
     success = true;
-    res.status(200).json({ success, authToken });
+    res.status(200).json({ success, authToken,isAdmin:true });
   } catch (err) {
     return res.status(500).json({ success: false, error: err });
   }
 });
+// admin login
+router.post('/login',
+[body('email','Enter a valid password').isEmail(),
+ body('password','Password cannot be blank').exists()],async (req,res)=>{
+
+    let success=false;
+    // if there are errors in the user input return them using express-validator
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success,errors: errors.array() });
+    }
+    const {email,password} = req.body;
+
+    try {
+        let user = await Admin.findOne({email : email});
+        
+        if(!user){
+            return res.status(400).json({success,error:"Admin with this email does not exist"});
+        }   
+        
+        const passwordCompare = await bcrypt.compare(password,user.password);
+
+        if(!passwordCompare){
+            return res.status(400).json({success,error:"Wrong Email or Password"});
+        }
+        const data = {
+            user : {
+                id : user.id
+            }
+        }
+        const authToken =  jwt.sign(data, JWT_SECRET);
+        success=true;
+        res.status(200).json({success,authToken,user,isAdmin:true});
+
+    } catch(error){
+        console.error(error.message);
+        res.status(500).json("Internal Server Error");
+    }          
+})
+
 
 // Route to delete an admin
 router.delete('/delete-admin/:adminId', async (req, res) => {
