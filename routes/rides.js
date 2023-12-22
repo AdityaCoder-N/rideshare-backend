@@ -101,15 +101,32 @@ router.get('/get-rides', async (req, res) => {
   }
 });
 
+router.get('/get-ride/:id', fetchUser, async (req, res) => {
+  try {
+    const rideId = req.params.id;
+    const userId = req.user.id;
+    
+    // Find the ride
+    const ride = await Ride.findById(rideId).populate('postedBy');
+    
+    if (!ride) {
+      return res.status(404).json({ success: false, error: 'Ride not found' });
+    }
 
-
+    res.status(200).json({ ride,success: true, message: 'Ride Sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
 
 router.post('/accept-ride', fetchUser, async (req, res) => {
     try {
-      const { rideId  } = req.body;
-      const userId = req.user.id;
-      
-      // Find the ride
+      console.log(req.body)
+      const {rideId,userId} = req.body;
+
+      // console.log("ride id : ",rideId);
+      // console.log("user id : ",userId)
       const ride = await Ride.findById(rideId);
       
       if (!ride) {
@@ -127,24 +144,31 @@ router.post('/accept-ride', fetchUser, async (req, res) => {
       if (!ridePoster) {
         return res.status(404).json({ success: false, error: 'User who posted the ride not found' });
       }
-  
+      
+      console.log("chalra-1")
+      const user = await User.findById(userId)
       // Check if the user has sufficient balance
-      if (req.user.balance < ride.cost) {
+      if (user.balance < ride.cost) {
+        console.log("chalra-cost")
         return res.status(400).json({ success: false, error: 'Insufficient balance' });
       }
-  
+      
+      console.log("chalra")
       // Update ride details
       ride.status = "ACTIVE";
       ride.acceptedBy = userId;
       ride.save();
       
+      console.log("chalra2")
       // Decrease balance of the user accepting the ride
-      req.user.balance -= ride.cost;
-      await req.user.save();
-  
+      user.balance -= ride.cost;
+      await user.save();
+      
+      console.log("chalra3")
       // Increase balance of the user who posted the ride
       ridePoster.balance += ride.cost;
       await ridePoster.save();
+      console.log("chalra4")
   
       res.status(200).json({ success: true, message: 'Ride accepted successfully' });
     } catch (error) {
