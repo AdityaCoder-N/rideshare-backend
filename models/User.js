@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
   imageUrl:{
     type:String,
     required:false
+  },
+  contact:{
+    type:Number,
+    required:false
   }
 });
 

@@ -21,7 +21,7 @@ router.post('/make-request',fetchUser , cpUpload,  async (req, res) => {
     console.log("DL Photo: ", dlPhoto);
     console.log("Profile Photo: ", profilePhoto);
 
-    const { id, state, dob, lisenceNumber } = req.body;
+    const { id, state, dob, lisenceNumber ,contact} = req.body;
     
     const existingRequest = await Request.findOne({ user: id });
 
@@ -41,9 +41,12 @@ router.post('/make-request',fetchUser , cpUpload,  async (req, res) => {
     console.log(newRequest)
     await newRequest.save();
 
-    let user = User.findById(id)
+    console.log('request saved')
+    let user = await User.findById(id)
     user.imageUrl=profilePhoto.path;
+    user.contact=contact;
     await user.save();
+    console.log('user saved')
 
      res.status(200).json({ success: true, message: 'Request made successfully', request: newRequest });
     // return res.json("good");
