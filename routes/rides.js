@@ -65,7 +65,7 @@ router.get('/ride-taken-status/:userid', async (req, res) => {
     const userId = req.params.userid;
     
     // Assuming you have a field like 'postedBy' in your Ride model
-    const rides = await Ride.find({ acceptedBy: userId }).populate("postedBy" , "name");
+    const rides = await Ride.find({ acceptedBy: userId }).populate("postedBy" , "name contact");
     
     console.log(rides);
     
@@ -78,29 +78,33 @@ router.get('/ride-taken-status/:userid', async (req, res) => {
 
 
 
-router.get('/get-rides', async (req, res) => {
+router.post('/get-rides', async (req, res) => {
   try {
-      // Get the current time
-      const currentTime = new Date();
+    const { userId } = req.body;
 
-      // Find rides with startDate greater than the current date or
-      // rides with startDate equal to the current date and startTime greater than the current time
-      const rides = await Ride.find({
-          $or: [
-              { startDate: { $gt: currentTime } },
-              {
-                  startDate: { $eq: currentTime },
-                  startTime: { $gt: currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-              }
-          ],
-          acceptedBy: null // Exclude rides that are already accepted
-      }).populate('postedBy', 'name'); // Populate the 'postedBy' field with user's name
+    // Get the current time
+    const currentTime = new Date();
 
-      res.status(200).json({ success: true, rides });
+    // Find rides with startDate greater than the current date or
+    // rides with startDate equal to the current date and startTime greater than the current time
+    const rides = await Ride.find({
+      $or: [
+        { startDate: { $gt: currentTime } },
+        {
+          startDate: { $eq: currentTime },
+          startTime: { $gt: currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+        }
+      ],
+      acceptedBy: null, // Exclude rides that are already accepted
+      postedBy: { $ne: userId } // Exclude rides posted by the user making the request
+    }).populate('postedBy', 'name'); // Populate the 'postedBy' field with user's name
+
+    res.status(200).json({ success: true, rides });
   } catch (error) {
-      res.status(500).json({ success: false, error });
+    res.status(500).json({ success: false, error });
   }
 });
+
 
 router.get('/get-ride/:id', fetchUser, async (req, res) => {
   try {

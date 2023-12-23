@@ -266,7 +266,27 @@ router.delete('/delete-all-users', async (req, res) => {
     }
 });
   
+router.delete('/delete-request/:requestId', fetchUser, async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
 
+    // Find the request by ID
+    const request = await Request.findById(requestId);
+
+    // Check if the request exists
+    if (!request) {
+      return res.status(404).json({ success: false, error: 'Request not found' });
+    }
+
+    // Delete the request
+    await request.remove();
+
+    res.status(200).json({ success: true, message: 'Request deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
 
 
 module.exports = router;
